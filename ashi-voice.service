@@ -1,0 +1,20 @@
+[Unit]
+Description=ASHI Voice Daemon — wake word + STT + TTS
+Documentation=https://github.com/villaex/ashi
+After=ashi.service sound.target
+Wants=ashi.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/basitdev/workspace/ashi
+ExecStart=/home/basitdev/workspace/ashi/.venv/bin/python functions/voice_daemon.py
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=-/home/basitdev/workspace/ashi/.env
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ashi-voice
+
+[Install]
+WantedBy=default.target

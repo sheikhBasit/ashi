@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0d0d0d;
+  --surface: #141414;
+  --surface2: #1c1c1c;
+  --border: #2a2a2a;
+  --text: #e8e8e8;
+  --text-muted: #666;
+  --accent: #7c6af7;
+  --accent-dim: #3d3468;
+  --green: #4ade80;
+  --red: #f87171;
+  --yellow: #fbbf24;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow: hidden;
+  height: 100vh;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Wiki markdown rendering */
+.wiki-markdown { font-size: 13px; line-height: 1.8; color: var(--text); }
+.wiki-markdown h1 { font-size: 18px; font-weight: 700; color: var(--accent); margin: 0 0 12px; }
+.wiki-markdown h2 { font-size: 15px; font-weight: 600; color: var(--text); margin: 20px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+.wiki-markdown h3 { font-size: 13px; font-weight: 600; color: var(--text); margin: 14px 0 6px; }
+.wiki-markdown p { margin: 0 0 10px; }
+.wiki-markdown ul, .wiki-markdown ol { margin: 0 0 10px 20px; }
+.wiki-markdown li { margin: 3px 0; }
+.wiki-markdown code { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 11px; color: var(--green); font-family: inherit; }
+.wiki-markdown pre { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; margin: 10px 0; overflow-x: auto; }
+.wiki-markdown pre code { background: none; border: none; padding: 0; color: var(--text); font-size: 11px; }
+.wiki-markdown blockquote { border-left: 2px solid var(--accent); margin: 10px 0; padding: 4px 12px; color: var(--text-muted); }
+.wiki-markdown a { color: var(--accent); text-decoration: none; }
+.wiki-markdown a:hover { text-decoration: underline; }
+.wiki-markdown strong { color: var(--text); font-weight: 600; }
+.wiki-markdown hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.wiki-markdown table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+.wiki-markdown th { background: var(--surface2); padding: 6px 10px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+.wiki-markdown td { padding: 5px 10px; border: 1px solid var(--border); }
+
+.react-flow__background { background: var(--bg); }
+.react-flow__controls { background: var(--surface); border: 1px solid var(--border); }
+.react-flow__controls-button { background: var(--surface); border-bottom: 1px solid var(--border); fill: var(--text-muted); }
+.react-flow__controls-button:hover { background: var(--surface2); }
+.react-flow__minimap { background: var(--surface); border: 1px solid var(--border); }

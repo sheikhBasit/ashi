@@ -25,6 +25,12 @@ _REVERSIBLE_TOOLS = {
     "get_skill_info",
     "ide_list_extensions",
     "ide_status",
+    # Computer control — read-only tools
+    "screen_capture",      # takes a screenshot, no side effects
+    "screen_read",         # OCR on screenshot, read-only
+    "find_on_screen",      # OCR search, read-only
+    "screen_understand",   # vision model analysis, read-only
+    "cc_health",           # health check, read-only
 }
 
 # Tools that are always irreversible (write/delete/network)
@@ -42,6 +48,14 @@ _IRREVERSIBLE_TOOLS = {
     "ide_smart_open",
     "opencode",
     "emit_metric",
+    # Computer control — tools that affect system state
+    "mouse_move",          # moves cursor — visible but low risk
+    "mouse_click",         # clicks — can trigger actions
+    "mouse_scroll",        # scrolls — low risk but changes view state
+    "keyboard_type",       # types text — can modify documents
+    "keyboard_key",        # presses keys — can trigger shortcuts
+    "open_app",            # launches applications
+    "focus_window",        # changes focused window
 }
 
 # Shell commands that are read-only (prefix/exact match)

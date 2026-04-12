@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Node / Frontend
+node_modules/
+app/dist/
+app/node_modules/
+
+# Rust / Tauri
+app/src-tauri/target/
+app/src-tauri/gen/
+
+# Secrets & Config
+.env
+.env.*
+secrets.json
+*.key
+*.pem
+
+# Claude / MCP
+.mcp.json
+CLAUDE.md
+
+# Cache
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Memory / DB (local data, not for repo)
+memory/lancedb/
+memory/kuzu/
+*.db
+*.sqlite
+
+# Logs
+*.log
+logs/

@@ -33,6 +33,19 @@ Available tools and their args:
 - list_skills: {"system": "all"}
 - opencode: {"task": str, "cwd": str (optional)}
 
+Computer control tools:
+- screen_capture: {"region": "x,y,w,h" (optional), "output_format": "path"|"base64"}
+- screen_read: {"region": "x,y,w,h" (optional), "image_path": str (optional), "lang": "eng"}
+- screen_understand: {"question": str, "image_path": str (optional), "region": "x,y,w,h" (optional)}
+- find_on_screen: {"text": str, "region": "x,y,w,h" (optional), "confidence": 0.6}
+- mouse_move: {"x": int, "y": int, "absolute": true}
+- mouse_click: {"button": "left"|"right"|"middle", "x": int (optional), "y": int (optional), "clicks": 1}
+- mouse_scroll: {"direction": "up"|"down", "amount": 3}
+- keyboard_type: {"text": str, "delay_ms": 12}
+- keyboard_key: {"keys": "ctrl+c"|"alt+tab"|"super"|"return" etc}
+- open_app: {"app_name": str, "args": str (optional)}
+- focus_window: {"window_name": str}
+
 Output format (JSON only, no markdown fences):
 {"tool": "<tool_name>", "args": {<args>}}
 """
