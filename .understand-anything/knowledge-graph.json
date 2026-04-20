@@ -1,0 +1,453 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-04-20T00:00:00.000Z",
+  "projectRoot": "/home/basitdev/workspace/ashi",
+  "nodes": [
+    {
+      "id": "file:functions/ashi_daemon.py",
+      "type": "file",
+      "name": "ashi_daemon.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/ashi_daemon.py",
+      "layer": "api",
+      "summary": "FastAPI HTTP daemon (localhost:7070) — the central runtime for ASHI. Exposes endpoints: POST /agent/run, POST /agent/confirm, GET /agent/status/{id}, POST /tool/call, GET /health, GET /context, GET /context/summary, GET /memory/stats, GET /memory/recent, GET /tools. Starts context_engine, vizier_loop, and telegram_bot as background asyncio tasks on startup. Runs agents in a thread pool. Designed as a systemd user service.",
+      "language": "python",
+      "concepts": ["FastAPI", "asyncio", "agent orchestration", "systemd service", "HTTP API"]
+    },
+    {
+      "id": "file:functions/host_agent.py",
+      "type": "file",
+      "name": "host_agent.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/host_agent.py",
+      "layer": "service",
+      "summary": "Multi-brain planner that decomposes a goal into executable steps. Calls 3 OpenRouter models in parallel (qwen3-coder, llama-3.3-70b, gpt-oss-20b), merges their plans by consensus voting (steps in 2+ plans ranked first), and falls back to local qwen3:4b via Ollama if cloud is unavailable.",
+      "language": "python",
+      "concepts": ["multi-brain planning", "parallel LLM calls", "consensus voting", "fallback", "OpenRouter"]
+    },
+    {
+      "id": "file:functions/blackboard.py",
+      "type": "file",
+      "name": "blackboard.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/blackboard.py",
+      "layer": "service",
+      "summary": "Shared state dataclass for a single agent run. Holds goal, plan (list of steps), per-step results, progress counters, and timestamps. Provides helpers: set_plan(), record_result(), context_summary() (for prompt injection), is_done, has_budget, and to_dict().",
+      "language": "python",
+      "concepts": ["blackboard pattern", "agent state", "dataclass", "shared state"]
+    },
+    {
+      "id": "file:functions/agent_runner.py",
+      "type": "file",
+      "name": "agent_runner.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/agent_runner.py",
+      "layer": "service",
+      "summary": "Main agent execution loop: creates a Blackboard, calls HostAgent.plan() to generate steps, then iterates through steps calling tool_dispatch for each one. Records results, handles confirmation gates, and returns an AgentResult dataclass.",
+      "language": "python",
+      "concepts": ["agent loop", "step execution", "tool dispatch", "result aggregation"]
+    },
+    {
+      "id": "file:functions/tool_dispatch.py",
+      "type": "file",
+      "name": "tool_dispatch.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/tool_dispatch.py",
+      "layer": "service",
+      "summary": "Central tool dispatcher: receives a tool call dict {tool, args}, routes to the correct function module (run_shell, run_skill, ingest_source, wiki, update_entity, memory_manager, etc.), and returns a standardised result dict.",
+      "language": "python",
+      "concepts": ["tool routing", "dispatcher", "function registry"]
+    },
+    {
+      "id": "file:functions/memory_manager.py",
+      "type": "file",
+      "name": "memory_manager.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/memory_manager.py",
+      "layer": "service",
+      "summary": "Three-tier memory system: Hot (in-memory deque, last 100 interactions), Warm (LanceDB vector store for semantic recall), Cold (Google Drive daily export). Exposes a singleton `memory` instance with remember(), recall(), remember_interaction(), stats(), recent(), and flush_session_to_file().",
+      "language": "python",
+      "concepts": ["memory tiers", "LanceDB", "vector search", "Google Drive", "semantic recall"]
+    },
+    {
+      "id": "file:functions/vizier_loop.py",
+      "type": "file",
+      "name": "vizier_loop.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/vizier_loop.py",
+      "layer": "service",
+      "summary": "Proactive intelligence loop running every 5 minutes (configurable). Reads LiveContext, queries an LLM (llama-3.3-70b via OpenRouter) with 'What should ASHI do right now?', and auto-executes safe actions (send_notification, write_reminder, etc.) at confidence >= 0.85, sends desktop notifications at >= 0.5, and logs below that.",
+      "language": "python",
+      "concepts": ["proactive AI", "autonomous loop", "confidence thresholds", "auto-execution"]
+    },
+    {
+      "id": "file:functions/context_engine.py",
+      "type": "file",
+      "name": "context_engine.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/context_engine.py",
+      "layer": "service",
+      "summary": "Background service that maintains a LiveContext snapshot: monitors system state (CPU, RAM, disk, processes, active services), reads SecondBrain daily notes and project state, and exposes get_context() returning a structured context object used by vizier_loop and the daemon /context endpoint.",
+      "language": "python",
+      "concepts": ["context engine", "system monitoring", "LiveContext", "background loop"]
+    },
+    {
+      "id": "file:functions/skill_registry.py",
+      "type": "file",
+      "name": "skill_registry.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/skill_registry.py",
+      "layer": "service",
+      "summary": "Skill registry that loads skill definitions from skills/registry.json and skill .md files. Provides lookup by name, list all skills, and categorise by provider (Ollama vs Claude plugin).",
+      "language": "python",
+      "concepts": ["skill registry", "plugin system", "skill lookup"]
+    },
+    {
+      "id": "file:functions/run_skill.py",
+      "type": "file",
+      "name": "run_skill.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/run_skill.py",
+      "layer": "service",
+      "summary": "Executes a named skill: loads the skill prompt from the registry, calls Ollama or OpenRouter with _call_with_fallback(), and returns the LLM response. _call_with_fallback() provides the Ollama→OpenRouter→local fallback chain.",
+      "language": "python",
+      "concepts": ["skill execution", "Ollama", "OpenRouter", "fallback chain", "LLM call"]
+    },
+    {
+      "id": "file:functions/run_shell.py",
+      "type": "file",
+      "name": "run_shell.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/run_shell.py",
+      "layer": "utility",
+      "summary": "Executes shell commands in a sandboxed subprocess with timeout, captures stdout/stderr, and returns a structured result. Includes an allowlist check for dangerous commands.",
+      "language": "python",
+      "concepts": ["shell execution", "subprocess", "sandboxing", "security"]
+    },
+    {
+      "id": "file:functions/telegram_bot.py",
+      "type": "file",
+      "name": "telegram_bot.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/telegram_bot.py",
+      "layer": "api",
+      "summary": "Telegram bot that provides a chat interface to ASHI: receives messages, calls the daemon's /agent/run endpoint, and replies with agent results. Also handles /status, /memory, and /tools commands.",
+      "language": "python",
+      "concepts": ["Telegram bot", "chat interface", "bot API", "async"]
+    },
+    {
+      "id": "file:functions/wiki.py",
+      "type": "file",
+      "name": "wiki.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/wiki.py",
+      "layer": "service",
+      "summary": "Wiki tool: search the SecondBrain Obsidian vault (full-text and fuzzy), append log entries, read wiki pages, and update knowledge base articles.",
+      "language": "python",
+      "concepts": ["wiki", "SecondBrain", "Obsidian", "full-text search", "knowledge base"]
+    },
+    {
+      "id": "file:functions/gdrive_tool.py",
+      "type": "file",
+      "name": "gdrive_tool.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/gdrive_tool.py",
+      "layer": "utility",
+      "summary": "Google Drive tool: upload files, list recent documents, and download content for the cold memory tier export.",
+      "language": "python",
+      "concepts": ["Google Drive API", "file sync", "cloud backup"]
+    },
+    {
+      "id": "file:functions/ingest_source.py",
+      "type": "file",
+      "name": "ingest_source.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/ingest_source.py",
+      "layer": "service",
+      "summary": "Ingests external sources (URLs, PDFs, markdown files) into the SecondBrain: fetches content, chunks it, embeds into LanceDB, and writes a wiki note.",
+      "language": "python",
+      "concepts": ["ingestion pipeline", "embedding", "LanceDB", "web scraping"]
+    },
+    {
+      "id": "file:functions/update_entity.py",
+      "type": "file",
+      "name": "update_entity.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/update_entity.py",
+      "layer": "service",
+      "summary": "Updates structured entities in the SecondBrain knowledge graph (Kuzu DB): create/update people, projects, decisions, and relationships between them.",
+      "language": "python",
+      "concepts": ["Kuzu graph DB", "entity management", "knowledge graph"]
+    },
+    {
+      "id": "file:functions/self_improve.py",
+      "type": "file",
+      "name": "self_improve.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/self_improve.py",
+      "layer": "service",
+      "summary": "Self-improvement hook called after each agent run. Evaluates success/failure patterns, proposes skill improvements, and logs lessons to SecondBrain/AI/lessons/ for review.",
+      "language": "python",
+      "concepts": ["self-improvement", "meta-learning", "lessons", "agent evaluation"]
+    },
+    {
+      "id": "file:functions/tcu.py",
+      "type": "file",
+      "name": "tcu.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/tcu.py",
+      "layer": "data",
+      "summary": "Task Control Unit persistence: stores agent run records in SQLite. CRUD operations for TCU records including status updates, list running, and retrieve history.",
+      "language": "python",
+      "concepts": ["TCU", "SQLite", "task tracking", "persistence"]
+    },
+    {
+      "id": "file:functions/ralph.py",
+      "type": "file",
+      "name": "ralph.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/ralph.py",
+      "layer": "service",
+      "summary": "Ralph — nightly autonomous maintenance agent. Runs at 03:00 via cron, reads the SecondBrain daily note and project state, prioritises tasks, and submits them as agent runs to the daemon.",
+      "language": "python",
+      "concepts": ["autonomous agent", "nightly maintenance", "scheduled tasks", "cron"]
+    },
+    {
+      "id": "file:functions/monitor.py",
+      "type": "file",
+      "name": "monitor.py",
+      "filePath": "/home/basitdev/workspace/ashi/functions/monitor.py",
+      "layer": "utility",
+      "summary": "System monitor that collects CPU, RAM, disk, network, and running process metrics for the MonitorPanel in the Tauri frontend and the context_engine.",
+      "language": "python",
+      "concepts": ["system monitoring", "psutil", "metrics", "hardware stats"]
+    },
+    {
+      "id": "file:functions/blackboard.py",
+      "type": "class",
+      "name": "Blackboard",
+      "filePath": "/home/basitdev/workspace/ashi/functions/blackboard.py",
+      "layer": "service",
+      "summary": "Dataclass that is the single shared state object for one agent run. Tracks goal, plan steps, per-step results, step index, budget, and provides context_summary() for prompt injection into replanning calls.",
+      "language": "python",
+      "concepts": ["blackboard pattern", "shared state", "agent run"]
+    },
+    {
+      "id": "file:functions/ashi_daemon.py:ResultStore",
+      "type": "class",
+      "name": "ResultStore",
+      "filePath": "/home/basitdev/workspace/ashi/functions/ashi_daemon.py",
+      "layer": "api",
+      "summary": "Thread-safe, bounded in-memory store (OrderedDict with asyncio Lock) for agent run results. FIFO eviction at 100 entries. Used by the daemon to serve GET /agent/status/{id} requests.",
+      "language": "python",
+      "concepts": ["thread safety", "in-memory cache", "bounded buffer", "asyncio"]
+    },
+    {
+      "id": "file:functions/host_agent.py:HostAgent",
+      "type": "class",
+      "name": "HostAgent",
+      "filePath": "/home/basitdev/workspace/ashi/functions/host_agent.py",
+      "layer": "service",
+      "summary": "Multi-brain planner class. plan(bb: Blackboard) decomposes bb.goal into steps via _plan_multi_brain() (parallel OpenRouter calls) or _plan_local() (Ollama fallback), then stores the merged plan in the blackboard.",
+      "language": "python",
+      "concepts": ["planning agent", "multi-brain", "LLM orchestration"]
+    },
+    {
+      "id": "file:app/src/App.tsx",
+      "type": "file",
+      "name": "App.tsx",
+      "filePath": "/home/basitdev/workspace/ashi/app/src/App.tsx",
+      "layer": "ui",
+      "summary": "Root React component for the Tauri desktop app. Manages active panel state (pipeline|wiki|tasks|terminal|monitor|logs|agent) and renders the Sidebar + main panel. Loads skills and TCUs on mount via the Tauri IPC API bridge.",
+      "language": "typescript",
+      "concepts": ["React", "Tauri", "panel routing", "IPC bridge"]
+    },
+    {
+      "id": "file:app/src/api.ts",
+      "type": "file",
+      "name": "api.ts",
+      "filePath": "/home/basitdev/workspace/ashi/app/src/api.ts",
+      "layer": "api",
+      "summary": "Tauri IPC bridge: wraps invoke() calls to the Rust backend commands and HTTP calls to the Python daemon (localhost:7070). Exports typed functions: listSkills, listTCUs, runAgent, callTool, getHealth, getContext.",
+      "language": "typescript",
+      "concepts": ["Tauri IPC", "HTTP client", "API bridge", "TypeScript"]
+    },
+    {
+      "id": "file:app/src/components/AgentPanel.tsx",
+      "type": "file",
+      "name": "AgentPanel.tsx",
+      "filePath": "/home/basitdev/workspace/ashi/app/src/components/AgentPanel.tsx",
+      "layer": "ui",
+      "summary": "Agent run panel: text input for goal, max-steps slider, start button, live status polling, step-by-step progress display, and final output rendering.",
+      "language": "typescript",
+      "concepts": ["React", "agent UI", "polling", "Tauri"]
+    },
+    {
+      "id": "file:app/src/components/ChatPanel.tsx",
+      "type": "file",
+      "name": "ChatPanel.tsx",
+      "filePath": "/home/basitdev/workspace/ashi/app/src/components/ChatPanel.tsx",
+      "layer": "ui",
+      "summary": "Side chat panel that sends freeform messages to the daemon's /tool/call endpoint (run_skill tool), streaming responses back to the UI.",
+      "language": "typescript",
+      "concepts": ["React", "chat UI", "streaming", "Tauri"]
+    },
+    {
+      "id": "file:app/src/components/MonitorPanel.tsx",
+      "type": "file",
+      "name": "MonitorPanel.tsx",
+      "filePath": "/home/basitdev/workspace/ashi/app/src/components/MonitorPanel.tsx",
+      "layer": "ui",
+      "summary": "System monitor panel showing live CPU, RAM, disk, and process metrics fetched from the Python monitor module via the daemon context endpoint.",
+      "language": "typescript",
+      "concepts": ["React", "system monitoring", "live metrics", "charts"]
+    },
+    {
+      "id": "file:app/src/components/WikiViewer.tsx",
+      "type": "file",
+      "name": "WikiViewer.tsx",
+      "filePath": "/home/basitdev/workspace/ashi/app/src/components/WikiViewer.tsx",
+      "layer": "ui",
+      "summary": "SecondBrain wiki viewer panel: search wiki pages, browse the vault directory tree, and render markdown content.",
+      "language": "typescript",
+      "concepts": ["React", "wiki viewer", "markdown rendering", "SecondBrain"]
+    },
+    {
+      "id": "file:app/src/components/PipelineBuilder.tsx",
+      "type": "file",
+      "name": "PipelineBuilder.tsx",
+      "filePath": "/home/basitdev/workspace/ashi/app/src/components/PipelineBuilder.tsx",
+      "layer": "ui",
+      "summary": "Visual pipeline builder panel for composing and running multi-step skill chains. Lists available skills and lets the user chain them together then execute the pipeline.",
+      "language": "typescript",
+      "concepts": ["React", "pipeline builder", "skill chaining", "visual editor"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge:daemon-uses-agent-runner",
+      "source": "file:functions/ashi_daemon.py",
+      "target": "file:functions/agent_runner.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:daemon-uses-tool-dispatch",
+      "source": "file:functions/ashi_daemon.py",
+      "target": "file:functions/tool_dispatch.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:daemon-uses-memory-manager",
+      "source": "file:functions/ashi_daemon.py",
+      "target": "file:functions/memory_manager.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:daemon-uses-context-engine",
+      "source": "file:functions/ashi_daemon.py",
+      "target": "file:functions/context_engine.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:daemon-uses-vizier-loop",
+      "source": "file:functions/ashi_daemon.py",
+      "target": "file:functions/vizier_loop.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:daemon-uses-telegram-bot",
+      "source": "file:functions/ashi_daemon.py",
+      "target": "file:functions/telegram_bot.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:daemon-uses-self-improve",
+      "source": "file:functions/ashi_daemon.py",
+      "target": "file:functions/self_improve.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:agent-runner-uses-host-agent",
+      "source": "file:functions/agent_runner.py",
+      "target": "file:functions/host_agent.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:agent-runner-uses-blackboard",
+      "source": "file:functions/agent_runner.py",
+      "target": "file:functions/blackboard.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:agent-runner-uses-tool-dispatch",
+      "source": "file:functions/agent_runner.py",
+      "target": "file:functions/tool_dispatch.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:host-agent-uses-blackboard",
+      "source": "file:functions/host_agent.py",
+      "target": "file:functions/blackboard.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:host-agent-uses-run-skill",
+      "source": "file:functions/host_agent.py",
+      "target": "file:functions/run_skill.py",
+      "type": "imports"
+    },
+    {
+      "id": "edge:tool-dispatch-uses-run-shell",
+      "source": "file:functions/tool_dispatch.py",
+      "target": "file:functions/run_shell.py",
+      "type": "uses"
+    },
+    {
+      "id": "edge:tool-dispatch-uses-run-skill",
+      "source": "file:functions/tool_dispatch.py",
+      "target": "file:functions/run_skill.py",
+      "type": "uses"
+    },
+    {
+      "id": "edge:tool-dispatch-uses-wiki",
+      "source": "file:functions/tool_dispatch.py",
+      "target": "file:functions/wiki.py",
+      "type": "uses"
+    },
+    {
+      "id": "edge:tool-dispatch-uses-ingest",
+      "source": "file:functions/tool_dispatch.py",
+      "target": "file:functions/ingest_source.py",
+      "type": "uses"
+    },
+    {
+      "id": "edge:tool-dispatch-uses-update-entity",
+      "source": "file:functions/tool_dispatch.py",
+      "target": "file:functions/update_entity.py",
+      "type": "uses"
+    },
+    {
+      "id": "edge:app-uses-api",
+      "source": "file:app/src/App.tsx",
+      "target": "file:app/src/api.ts",
+      "type": "imports"
+    },
+    {
+      "id": "edge:agent-panel-uses-api",
+      "source": "file:app/src/components/AgentPanel.tsx",
+      "target": "file:app/src/api.ts",
+      "type": "imports"
+    },
+    {
+      "id": "edge:chat-panel-uses-api",
+      "source": "file:app/src/components/ChatPanel.tsx",
+      "target": "file:app/src/api.ts",
+      "type": "imports"
+    }
+  ],
+  "tours": [
+    {
+      "id": "tour:agent-run-flow",
+      "title": "Agent Run: Goal to Execution",
+      "steps": [
+        { "nodeId": "file:app/src/components/AgentPanel.tsx", "reason": "User types a goal and clicks Start in the Tauri desktop UI." },
+        { "nodeId": "file:app/src/api.ts", "reason": "api.ts calls POST /agent/run on the Python daemon via HTTP." },
+        { "nodeId": "file:functions/ashi_daemon.py", "reason": "Daemon receives the request, creates a TCU ID, and spawns an async background task." },
+        { "nodeId": "file:functions/agent_runner.py", "reason": "Agent runner creates a Blackboard and drives the execution loop." },
+        { "nodeId": "file:functions/host_agent.py", "reason": "HostAgent decomposes the goal into steps using 3 parallel OpenRouter models with consensus voting." },
+        { "nodeId": "file:functions/tool_dispatch.py", "reason": "Each step is dispatched to the appropriate tool (shell, skill, wiki, etc.)." },
+        { "nodeId": "file:functions/blackboard.py", "reason": "Blackboard accumulates results and provides context for replanning." }
+      ]
+    },
+    {
+      "id": "tour:proactive-ai-loop",
+      "title": "Proactive Intelligence: Vizier Loop",
+      "steps": [
+        { "nodeId": "file:functions/context_engine.py", "reason": "Context engine continuously monitors system state and SecondBrain to maintain a LiveContext snapshot." },
+        { "nodeId": "file:functions/vizier_loop.py", "reason": "Every 5 minutes, Vizier reads the context, queries an LLM for proactive suggestions, and auto-executes safe actions." },
+        { "nodeId": "file:functions/memory_manager.py", "reason": "All interactions are recorded to the three-tier memory for future context recall." }
+      ]
+    }
+  ]
+}
